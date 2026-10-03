@@ -290,7 +290,7 @@ Parity against torch on random inputs, max |Δ|:
 | `grid` | 3.70e-06 | 493 KB |
 
 Both under the 1e-4 gate. Inference path is onnxruntime only: no torch at serving
-time, same pattern as [conformal-rul](https://github.com/mateus-aleixo/conformal-rul).
+time, same pattern as [turbofan-rul](https://github.com/mateus-aleixo/turbofan-rul).
 
 ## Bugs this run found
 

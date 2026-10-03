@@ -1,6 +1,6 @@
-# conformal-seg
+# defect-segmentation
 
-[![ci](https://github.com/mateus-aleixo/conformal-seg/actions/workflows/ci.yml/badge.svg)](https://github.com/mateus-aleixo/conformal-seg/actions/workflows/ci.yml)
+[![ci](https://github.com/mateus-aleixo/defect-segmentation/actions/workflows/ci.yml/badge.svg)](https://github.com/mateus-aleixo/defect-segmentation/actions/workflows/ci.yml)
 ![python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![license](https://img.shields.io/badge/license-MIT-green)
 
@@ -9,16 +9,7 @@ segmentation model is fine-tuned on MVTec AD defects and thresholded by **confor
 risk control**, so that the predicted defect region provably misses at most α of the
 true defect pixels (pixel-level false-negative rate ≤ α, finite-sample and
 distribution-free). The model is exported to ONNX with a parity check, and inference
-runs torch-free.
-
-Second of a series applying a single principle, *a prediction without a trustworthy
-confidence statement is not a decision aid*, to three different kinds of data:
-
-| repo | modality | the guarantee |
-|---|---|---|
-| [conformal-rul](https://github.com/mateus-aleixo/conformal-rul) | sensor sequences | RUL intervals with verified coverage, live on AWS Lambda |
-| **conformal-seg** | vision | defect masks bounding the missed-defect rate, live on AWS Lambda |
-| [conformal-rag](https://github.com/mateus-aleixo/conformal-rag) | language | selective QA that abstains at a calibrated error rate |
+runs torch-free, live on AWS Lambda (see [Serving](#serving)).
 
 ![Naive threshold vs conformal threshold on both categories](docs/figures/naive_vs_conformal.png)
 
@@ -106,15 +97,15 @@ when the model is *provably* careful enough, and escalate the rest.
   and a 1-channel defect head. The backbone is frozen by default so the fine-tune
   fits on a CPU overnight, and unfrozen with one flag on a GPU.
 - **Calibration.** `conformal.py` implements conformal risk control over the
-  threshold grid, the FNR-against-λ risk curve, and held-out verification. Same
-  correction and same small-n honesty as the sibling repos.
+  threshold grid, the FNR-against-λ risk curve, and held-out verification, with the
+  finite-sample correction.
 - **Control split.** `calibrate` also scores the defect-free `test/good/` images the
   loss cannot see, reporting the false-alarm rate and flagged area at both the naive
   and conformal thresholds. A guarantee reported without this number is half a
   result.
 - **Export and serving.** ONNX (opset 18) plus a parity check with max |Δ| logged,
-  then a FastAPI service on onnxruntime, in the same one-image-two-habitats container
-  conformal-rul uses. See below.
+  then a FastAPI service on onnxruntime, in one container image that runs unchanged
+  locally and on Lambda. See below.
 - **Tests and CI.** The suite runs on synthetic fixtures (random ellipse "defects"),
   with no dataset, no pretrained weights and no network. Deterministic by
   construction.
@@ -186,12 +177,11 @@ ones. Training and serving therefore share one implementation in
 [`preprocess.py`](src/conformal_seg/preprocess.py), and `registry.py` reads the input
 resolution out of the ONNX graph rather than taking it from a flag.
 
-**Deployment** is the conformal-rul arrangement repeated: Terraform for ECR, Lambda
-and the HTTP API, GitHub Actions authenticating by OIDC with no stored keys, a
-throttled stage and a budget alarm. Two things differ, both written up in
-[docs/deploy.md](docs/deploy.md): the IAM OIDC provider is account-global so this
-repo *references* the one conformal-rul created rather than declaring a second, and
-the registry is not committed. rul's networks are a few hundred KB; a MobileNetV3
+**Deployment**: Terraform for ECR, Lambda and the HTTP API, GitHub Actions
+authenticating by OIDC with no stored keys, a throttled stage and a budget alarm.
+Two details are written up in [docs/deploy.md](docs/deploy.md): the IAM OIDC
+provider is account-global, so this repo *references* the account's existing one
+rather than declaring a second, and the registry is not committed. A MobileNetV3
 backbone is 42 MB per category, so the registry ships as a release asset that the
 deploy workflow fetches before building. A container with no registry answers 503 on
 `/models` rather than failing to start, which is why the deploy smoke test checks

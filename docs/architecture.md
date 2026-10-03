@@ -106,5 +106,5 @@ the breakage is invisible until someone looks at a 2 GB image.
   `/models`, because an image built without a registry starts happily and 503s on
   every prediction, which a health check alone would call green.
 - Deploys authenticate by GitHub OIDC. No AWS keys exist anywhere. The IAM OIDC
-  provider is shared with conformal-rul and read with a `data` block, never
+  provider is shared with turbofan-rul's stack and read with a `data` block, never
   declared here; see [deploy.md](deploy.md).

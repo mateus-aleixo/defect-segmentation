@@ -1,8 +1,9 @@
 # Deploying to AWS
 
 The service runs on Lambda behind an HTTP API, from the same container that runs
-locally. This is the conformal-rul deployment, repeated: ECR, Lambda, HTTP API
-Gateway, Terraform, and GitHub Actions authenticating by OIDC with no stored keys.
+locally, on the stack [turbofan-rul](https://github.com/mateus-aleixo/turbofan-rul) uses: ECR, Lambda, HTTP
+API Gateway, Terraform, and GitHub Actions authenticating by OIDC with no stored
+keys. The AWS resources keep the project's original name, `conformal-seg`.
 
 Live: `https://6s8ozlsit4.execute-api.eu-west-1.amazonaws.com`
 
@@ -24,10 +25,10 @@ Measured: **cold start ~12 s, warm ~0.45 s**. Cold start is dominated by pulling
 real convolution rather than a 30x24 sensor window; more memory finishes sooner, so
 it is not more money.
 
-## Two things that differ from conformal-rul
+## Two things that differ from turbofan-rul
 
 **The OIDC provider is shared, not created.** An IAM OIDC provider is account-global
-and keyed by URL. conformal-rul already created
+and keyed by URL. turbofan-rul's stack already created
 `token.actions.githubusercontent.com` in this account, so `infra/oidc.tf` here reads
 it with a `data` block. Declaring it as a `resource` a second time fails with
 `EntityAlreadyExists`, and worse, a `terraform destroy` in this repo would delete the
@@ -101,4 +102,4 @@ terraform destroy -var budget_email=YOU@example.com
 
 The ECR repository is `force_delete`, so images go with it. Note the shared OIDC
 provider is a `data` source here and is therefore left alone, which is the intended
-behaviour: it belongs to conformal-rul.
+behaviour: it belongs to turbofan-rul's stack.

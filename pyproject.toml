@@ -37,9 +37,7 @@ dev = [
 ]
 
 [project.urls]
-Repository = "https://github.com/mateus-aleixo/conformal-seg"
-Series-1 = "https://github.com/mateus-aleixo/conformal-rul"
-Series-2 = "https://github.com/mateus-aleixo/conformal-rag"
+Repository = "https://github.com/mateus-aleixo/defect-segmentation"
 
 [build-system]
 requires = ["hatchling"]
@@ -57,7 +55,7 @@ line-length = 100
 src = ["src", "tests"]
 
 [tool.ruff.lint]
-# Same rule set as conformal-rul, so the series lints identically.
+# Same rule set as turbofan-rul and maintenance-qa-agent.
 select = ["E", "F", "I", "W", "UP", "B", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
