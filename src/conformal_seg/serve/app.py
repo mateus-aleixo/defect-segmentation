@@ -35,7 +35,7 @@ MODEL_ROOT = Path(os.environ.get("MODEL_ROOT", "models"))
 MAX_UPLOAD_BYTES = int(os.environ.get("MAX_UPLOAD_BYTES", 12 * 1024 * 1024))
 
 app = FastAPI(
-    title="conformal-seg",
+    title="defect-segmentation",
     version=__version__,
     description="Industrial defect segmentation whose masks provably miss at most "
     "alpha of defect pixels, served as a pass/escalate decision.",
