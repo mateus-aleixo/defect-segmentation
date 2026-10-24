@@ -108,8 +108,8 @@ def main() -> int:
                           rotation=90, va="center", ha="center", fontsize=8.6,
                           color="#444")
 
-    fig.suptitle("Conformal risk control bounds the missed-defect rate — "
-                 f"and says nothing about whether the mask is useful   (α = {alpha:.2f})",
+    fig.suptitle("Conformal risk control bounds the missed-defect rate; "
+                 f"it says nothing about whether the mask is useful   (α = {alpha:.2f})",
                  fontsize=11.5, y=0.975)
     fig.text(0.5, 0.018,
              "Each row shows the test image whose conformal miss-rate is closest to that "
