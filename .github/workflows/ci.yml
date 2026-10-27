@@ -28,8 +28,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The Lambda adapter only runs on Lambda, and anonymous pulls of it from ECR Public
+      # fail on shared runners. CI builds against an empty stand-in; deploy.yml builds
+      # the real one.
+      - name: Stand-in for the Lambda adapter
+        run: |
+          mkdir -p /tmp/adapter && touch /tmp/adapter/lambda-adapter
+          printf 'FROM scratch\nCOPY lambda-adapter /lambda-adapter\n' | docker build -t lambda-adapter:ci -f - /tmp/adapter
+
       - name: Build
-        run: docker build -t conformal-seg:ci .
+        run: docker build --build-arg LAMBDA_ADAPTER_IMAGE=lambda-adapter:ci -t conformal-seg:ci .
 
       # The serving image installs the package with --no-deps on top of a pinned,
       # torch-free requirements set. That is easy to break by editing pyproject,
