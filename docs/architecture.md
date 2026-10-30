@@ -108,3 +108,16 @@ the breakage is invisible until someone looks at a 2 GB image.
 - Deploys authenticate by GitHub OIDC. No AWS keys exist anywhere. The IAM OIDC
   provider is shared with turbofan-rul's stack and read with a `data` block, never
   declared here; see [deploy.md](deploy.md).
+
+## Training on a GPU
+
+`pyproject.toml` pins the CPU build of torch from PyPI, which is what CI needs. For a CUDA
+build, install it into the virtual environment and then call the environment's Python
+directly, because `uv run` re-syncs the environment from `pyproject.toml` on every call and
+silently reinstalls the CPU wheel.
+
+```bash
+uv pip install --reinstall --index-url https://download.pytorch.org/whl/cu126 \
+    "torch==2.13.0+cu126" torchvision
+./.venv/Scripts/python.exe -m conformal_seg.train --category metal_nut --device cuda
+```

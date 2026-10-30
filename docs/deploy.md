@@ -94,6 +94,34 @@ The deploy job's smoke test checks `/models` reports `metal_nut`, not just that
 `/health` is up: an image built without a registry starts happily and serves 503 on
 every prediction, which is a failed deploy that a health check alone calls green.
 
+## A request, locally
+
+```bash
+python -m conformal_seg.registry --run metal_nut   # build the registry first
+docker compose up --build
+curl -X POST "localhost:8000/predict?category=metal_nut" -F image=@part.png
+```
+
+```json
+{
+  "category": "metal_nut",
+  "decision": "escalate",
+  "flagged_fraction": 0.073451,
+  "min_area_frac": 0.001,
+  "input_size": 320,
+  "guarantee": {
+    "alpha": 0.1,
+    "threshold": 0.13,
+    "n_calibration": 18,
+    "held_out_fnr": 0.0551,
+    "false_alarm_rate": 0.0455
+  }
+}
+```
+
+Add `&return_mask=true` to get the binary mask as a base64 PNG, or `&min_area_frac=...` to
+move the escalation trigger. Interactive docs are at `localhost:8000/docs`.
+
 ## Teardown
 
 ```powershell
